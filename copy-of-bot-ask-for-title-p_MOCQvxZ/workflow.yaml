@@ -1,0 +1,18 @@
+schema: workflow/2022.04
+name: Copy of bot-ask-for-title
+inactive: true
+settings:
+  error_notification: true
+triggers:
+- id: hi_ERH9KDM
+steps:
+- namespace: send_text_message_or_reply
+  runtime: nodejs14.x
+  uses: telegram_bot_api-send-text-message-or-reply@0.0.4
+  props:
+    telegramBotApi:
+      authProvisionId: apn_r5h9XmP
+    chatId: "{{steps.trigger.event.chat_id}}"
+    text: Будь ласка, введіть назву... (відповідь на вихідне повідомлення)
+    reply_to_message_id: "{{steps.trigger.event.message_id}}"
+

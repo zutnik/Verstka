@@ -1,0 +1,99 @@
+schema: workflow/2022.04
+name: bot-handle-message
+inactive: true
+settings:
+  error_notification: true
+steps:
+- namespace: check_is_bot_message
+  runtime: nodejs14.x
+  uses: filter-end-based-on-condition@0.0.1
+  _props_cursor: dyp_xpUXdoz
+  props:
+    messageOnEnd: Got bot's message, aborting...
+    initialValue: "{{steps.trigger.event.message.from.is_bot}}"
+    condition: 'TRUE'
+- namespace: check_is_on_bot_reply_message
+  runtime: nodejs14.x
+  uses: filter-end-based-on-condition@0.0.1
+  _props_cursor: dyp_REUdQDW
+  props:
+    messageOnEnd: User replied to bot's message, aborting...
+    initialValue: "{{steps.trigger.event.message.reply_to_message?.from.is_bot}}"
+    condition: 'TRUE'
+- namespace: parse_data
+  runtime: nodejs14.x
+  uses: "./parse_data/entry.js"
+- namespace: handle_group
+  runtime: nodejs14.x
+  uses: "./handle_group/entry.js"
+  props:
+    botDataStore:
+      storeId: ds_qBu5AX
+- namespace: check_is_group
+  runtime: nodejs14.x
+  uses: filter-end-based-on-condition@0.0.1
+  _props_cursor: dyp_REUdQlR
+  props:
+    messageOnEnd: Media group already handled, aborting...
+    initialValue: "{{steps.handle_group.$return_value}}"
+    condition: 'FALSE'
+- namespace: validate_title
+  runtime: nodejs14.x
+  uses: "./validate_title/entry.js"
+- namespace: send_bot_ask_for_title
+  runtime: nodejs14.x
+  uses: "./send_bot_ask_for_title/entry.js"
+- namespace: check_if_title_exists
+  runtime: nodejs14.x
+  uses: filter-end-based-on-condition@0.0.1
+  _props_cursor: dyp_ZjU4dzB
+  props:
+    messageOnEnd: Title is not provided, aborting this workflow...
+    initialValue: "{{steps.validate_title.$return_value.isTitle}}"
+    condition: 'FALSE'
+- namespace: push_to_coda
+  disabled: true
+  runtime: nodejs14.x
+  uses: coda-create-rows@0.0.1
+  _props_cursor: dyp_VwUDbVK
+  props:
+    coda:
+      authProvisionId: apn_6LhkegY
+    docId:
+      __lv:
+        label: Тест для Егора
+        value: X0IPstIVX4
+    tableId:
+      __lv:
+        label: Кошик  та Верстка
+        value: grid-Y6LcZ86W5H
+    disableParsing: false
+    col_c-mN4SB3HoYU: "{{steps.parse_data.$return_value.title}}"
+    col_c-XSgANoriNC: 
+    col_c-w4Ad9TR6NM: 
+    col_c-F-iQ_6jFRX: "{{steps.parse_data.$return_value.duration || ''}}"
+    col_c-IxAx6sgV_-: https://t.me/TestVersta/{{steps.parse_data.$return_value.message_id}}
+    col_c-JsJFClp6-A: "{{steps.parse_data.$return_value.type}}"
+- namespace: push_to_coda_1
+  runtime: nodejs14.x
+  uses: coda-create-rows@0.0.1
+  _props_cursor: dyp_ZjUojo6
+  props:
+    coda:
+      authProvisionId: apn_YDhDj9z
+    docId:
+      __lv:
+        label: 'Bogdan project '
+        value: b9dNcIwixD
+    tableId:
+      __lv:
+        label: Board
+        value: grid-K6p4H2E52z
+    disableParsing: false
+    col_c-mN4SB3HoYU: "{{steps.parse_data.$return_value.title}}"
+    col_c-XSgANoriNC: "{{steps.trigger.event.message.from.username}}"
+    col_c-w4Ad9TR6NM: 
+    col_c-F-iQ_6jFRX: "{{steps.parse_data.$return_value.duration || ''}}"
+    col_c-IxAx6sgV_-: https://t.me/TestVersta/{{steps.parse_data.$return_value.message_id}}
+    col_c-JsJFClp6-A: "{{steps.parse_data.$return_value.type}}"
+

@@ -1,0 +1,15 @@
+schema: workflow/2022.04
+name: bot-daily-clean
+inactive: true
+settings:
+  error_notification: true
+triggers:
+- id: ti_gvT7pzL
+steps:
+- namespace: delete_all_records
+  runtime: nodejs14.x
+  uses: data_stores-delete-all-records@0.0.1
+  props:
+    dataStore:
+      storeId: ds_qBu5AX
+
